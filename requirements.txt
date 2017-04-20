@@ -1,0 +1,12 @@
+beautifulsoup4
+
+nltk == 3.2
+numpy == 1.12.1
+scipy == 0.18.1
+scikit-learn == 0.18.1
+pandas == 0.18.1
+matplotlib == 1.5.1
+gensim == 0.13.1
+
+Theano == 0.8.2
+keras == 1.2.2
