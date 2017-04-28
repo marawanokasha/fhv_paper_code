@@ -13,6 +13,8 @@ MIN_SIZE = 1
 MIN_SENT_LENGTH = 50
 MAX_NON_TABLE_ROW_LENGTH = 100
 
+STOP_WORDS = nltk.corpus.stopwords.words('english')
+
 extra_abbrv = [u'u.s', u'fig', u'figs', u'no', u'ser',
                u'jan', u'feb', u'mar', u'apr', u'may', u'jun', u'jul', u'aug', u'sep', u'oct', u'nov', u'dec',
                u'proc', u'natl', u'sci', u'al', u'biochem', u'mol', u'res', u'biophys', u'commun', u'acad',
@@ -89,6 +91,32 @@ def sentence_wordtokenizer(text):
     del tokens
     return stems
 
+def simple_tokenizer(text, doc_id):
+    """
+    Get clean stems out of a text where number, chemical, currency indicators have already been identified.
+    A list of clean stems are returned
+    """
+    tokenizer = RegexpTokenizer(r'\s+', gaps=True)
+    tokens = tokenizer.tokenize(text)
+    stems = []  # result
+    previous_unigram = None
+    for token in tokens:
+        stem = token.lower()
+        stem = stem.strip(string.punctuation)
+        if stem:
+            if is_stopword(stem):
+                stem = None
+            if stem and len(stem) >= MIN_SIZE:
+                # extract uni-grams
+                stems.append((stem,{doc_id: 1}))
+                # extract bi-grams
+                if previous_unigram: stems.append((previous_unigram + " " + stem,{doc_id: 1}))
+                previous_unigram = stem
+    del tokens
+    return stems
+
+def is_stopword(word):
+    return word in STOP_WORDS
 
 def is_number(str):
     """ Returns true if given string is a number (float or int)"""

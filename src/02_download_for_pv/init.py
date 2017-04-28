@@ -42,7 +42,6 @@ CLAIMS_PART_ID = "{}_claims_part-{}"
 
 BATCH_SIZE = 10000
 
-# preprocessed_location = "/mnt/data/shalaby/" + "preprocessed_data/extended_pv_abs_desc_claims_full_chunks/"
 preprocessed_location = root_location + "preprocessed_data/extended_pv_abs_desc_claims_full_chunks/"
 TRAINING_PREPROCESSED_FILES_PREFIX = preprocessed_location + "extended_pv_training_docs_data_preprocessed-"
 VALIDATION_PREPROCESSED_FILES_PREFIX = preprocessed_location + "extended_pv_validation_docs_data_preprocessed-"
