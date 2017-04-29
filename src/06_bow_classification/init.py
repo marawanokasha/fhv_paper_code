@@ -19,6 +19,7 @@ from utils.file import ensure_disk_location_exists
 root = logging.getLogger()
 for handler in root.handlers[:]:
     root.removeHandler(handler)
+
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO) # adds a default StreamHanlder
 #root.addHandler(logging.StreamHandler())
 
