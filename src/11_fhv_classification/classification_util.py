@@ -117,20 +117,6 @@ class MetricsCallback(keras.callbacks.Callback):
                 self.metrics_dict[self.epoch_index] = validation_metrics
 #                 self.best_validation_metrics = validation_metrics
 
-def nn_batch_generator(X_data, y_data, batch_size):
-    samples_per_epoch = X_data.shape[0]
-    number_of_batches = samples_per_epoch/batch_size
-    counter=0
-    index = np.arange(np.shape(y_data)[0])
-    while 1:
-        index_batch = index[batch_size*counter:batch_size*(counter+1)]
-        X_batch = X_data[index_batch,:].todense()
-        y_batch = y_data[index_batch]
-        counter += 1
-        yield np.array(X_batch),y_batch
-        if (counter > number_of_batches):
-            counter=0
-
 
 class ArrayReader(Process):
     def __init__(self, input_file, label_file, out_queue, batch_size, is_mlp=False, validate=False):
