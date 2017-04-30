@@ -1,16 +1,9 @@
-import logging
 from logging import info
 import sys
 import gzip
 import io
-import numpy as np
 from multiprocessing import Process, Queue
 from gensim.models.doc2vec import Doc2Vec, LabeledSentence
-from functools import partial
-root = logging.getLogger()
-for handler in root.handlers[:]:
-    root.removeHandler(handler)
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO) # adds a default StreamHanlder
 
 
 class ExtendedPVDocumentBatchGenerator(Process):
@@ -40,11 +33,11 @@ class ExtendedPVDocumentBatchGenerator(Process):
 
 
 class BatchWrapper(object):
-    def __init__(self, training_preprocessed_files_prefix, buffer_size=10000, batch_size=10000, level=1, level_type=None):
-        assert batch_size <= 10000 or batch_size is None
+    def __init__(self, training_preprocessed_files_prefix, buffer_size=10000, text_batch_size=10000, level=1, level_type=None):
+        assert text_batch_size <= 10000 or text_batch_size is None
         self.level = level
         self.level_type = level_type[0]
-        self.batch_size = batch_size
+        self.text_batch_size = text_batch_size
         self.q = Queue(maxsize=buffer_size)
         self.p = ExtendedPVDocumentBatchGenerator(training_preprocessed_files_prefix, queue=self.q,
                                                   start_file=0, offset=10000)
@@ -71,12 +64,12 @@ class BatchWrapper(object):
         curr_batch_iter = 0
         # divide the document to batches according to the batch size
         sentences = []
-        if self.batch_size is None:
+        if self.text_batch_size is None:
             sentences.append((doc_id, line_array))
         else:
             while curr_batch_iter < len_line_array:
-                sentences.append(LabeledSentence(words=line_array[curr_batch_iter: curr_batch_iter + self.batch_size], tags=[doc_id]))
-                curr_batch_iter += self.batch_size
+                sentences.append(LabeledSentence(words=line_array[curr_batch_iter: curr_batch_iter + self.text_batch_size], tags=[doc_id]))
+                curr_batch_iter += self.text_batch_size
         return tuple(sentences)
 
     def __iter__(self):

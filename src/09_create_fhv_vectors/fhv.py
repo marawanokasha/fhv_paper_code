@@ -1,34 +1,19 @@
-import json
-import nltk
-from nltk.tokenize import RegexpTokenizer
-import string
-import math
 import os
+import sys
 import io
 import sys
-import time
 from collections import namedtuple
 import cPickle as pickle
 from multiprocessing import Queue, Process
 import gzip
 from ExtendedPVDocumentBatchGenerator import BatchWrapper
-
-import numpy as np
-import random
-
-import itertools
-
-from sklearn.metrics import coverage_error
-import sklearn.metrics
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn import linear_model
-from sklearn.preprocessing import MultiLabelBinarizer
-
 from gensim.models.doc2vec import Doc2Vec, LabeledSentence
 
 import logging
 from logging import info
-from functools import partial
+
+sys.path.append(os.path.abspath('..'))
+from utils.file import ensure_disk_location_exists
 
 root = logging.getLogger()
 for handler in root.handlers[:]:
@@ -52,21 +37,14 @@ if sys.argv[2] not in ('document', 'claims', 'abstract', 'description'):
 level = int(sys.argv[1])
 model_name = sys.argv[2]
 
-SVM_SEED = 1234
 DOC2VEC_SEED = 1234
 MIN_WORD_COUNT = 100
 NUM_CORES = 16
-GLOBAL_VARS = namedtuple('GLOBAL_VARS', ['MODEL_NAME', 'DOC2VEC_MODEL_NAME', 'DOC2VEC_MODEL', 
-                                         'SVM_MODEL_NAME', 'NN_MODEL_NAME'])
+GLOBAL_VARS = namedtuple('GLOBAL_VARS', ['MODEL_NAME', 'DOC2VEC_MODEL_NAME'])
 VOCAB_MODEL = "vocab_model"
 MODEL_PREFIX = "model"
-VALIDATION_MINI_BATCH_SIZE = 10000
 VALIDATION_DICT = "validation_dict.pkl.gz"
-TEST_MATRIX = "test_matrix.pkl"
-TEST_DICT = "test_dict.pkl"
-METRICS = "metrics.pkl"
-CLASSIFIER = "classifier.pkl"
-TYPE_CLASSIFIER = "{}_classifier.pkl"
+TEST_DICT = "test_dict.pkl.gz"
 
 DOC2VEC_SIZE = 200
 DOC2VEC_WINDOW = 2
@@ -82,31 +60,24 @@ DOC2VEC_EPOCHS = 1  # we do our training manually one epoch at a time
 DOC2VEC_MAX_EPOCHS = 8
 REPORT_DELAY = 20  # report the progress every x seconds
 REPORT_VOCAB_PROGRESS = 10000  # report vocab progress every x documents
-VALIDATION_MINI_BATCH_SIZE = 10000
 
-root_location = "/mnt/virtual-machines/data/"
-word2vec_questions_file = result = root_location + 'tensorflow/word2vec/questions-words.txt'
+READ_QUEUE_SIZE = 10000
 
-preprocessed_location = result = root_location + "preprocessed_data/extended_pv_abs_desc_claims_full_chunks/"
+root_location = "../../data/"
 
-training_preprocessed_files_prefix = preprocessed_location + "extended_pv_training_docs_data_preprocessed-"
-validation_preprocessed_files_prefix = preprocessed_location + "extended_pv_validation_docs_data_preprocessed-"
-test_preprocessed_files_prefix = preprocessed_location + "extended_pv_test_docs_data_preprocessed-"
+preprocessed_location = result = root_location + "preprocessed_data/separated_datasets/"
 
+training_preprocessed_files_prefix = os.path.join(preprocessed_location, "training_docs_data_preprocessed-")
+validation_preprocessed_files_prefix = os.path.join(preprocessed_location, "validation_docs_data_preprocessed-")
+test_preprocessed_files_prefix = os.path.join(preprocessed_location, "test_docs_data_preprocessed-")
 
-def ensure_disk_location_exists(location):
-    if not os.path.exists(location):
-        os.makedirs(location)
 
 # loading vocabulary if exists
 doc2vec_model_save_location = os.path.join(root_location,
                                            "parameter_search_doc2vec_models_" + str(level) + '_' + model_name,
                                            "full")
-if not os.path.exists(doc2vec_model_save_location):
-    os.makedirs(doc2vec_model_save_location)
-if not os.path.exists(os.path.join(doc2vec_model_save_location, VOCAB_MODEL)):
-    os.makedirs(os.path.join(doc2vec_model_save_location, VOCAB_MODEL))
-
+ensure_disk_location_exists(doc2vec_model_save_location)
+ensure_disk_location_exists(os.path.join(doc2vec_model_save_location, VOCAB_MODEL))
 placeholder_model_name = 'doc2vec_size_{}_w_{}_type_{}_concat_{}_mean_{}_trainwords_{}_hs_{}_neg_{}_vocabsize_{}_model_{}'.format(DOC2VEC_SIZE,
                                                                 DOC2VEC_WINDOW,
                                                                 'dm' if DOC2VEC_TYPE == 1 else 'pv-dbow',
@@ -114,8 +85,7 @@ placeholder_model_name = 'doc2vec_size_{}_w_{}_type_{}_concat_{}_mean_{}_trainwo
                                                                 DOC2VEC_TRAIN_WORDS,
                                                                 DOC2VEC_HIERARCHICAL_SAMPLE,DOC2VEC_NEGATIVE_SAMPLE_SIZE,
                                                                 str(DOC2VEC_MAX_VOCAB_SIZE),
-                                                                str(level) + '_' + model_name
-                                                                )
+                                                                str(level) + '_' + model_name)
 
 GLOBAL_VARS.DOC2VEC_MODEL_NAME = placeholder_model_name
 placeholder_model_name = os.path.join(placeholder_model_name, "epoch_{}")
@@ -134,13 +104,13 @@ doc2vec_model = Doc2Vec(size=DOC2VEC_SIZE, window=DOC2VEC_WINDOW, min_count=MIN_
                         )
 
 if not os.path.exists(os.path.join(doc2vec_model_save_location, VOCAB_MODEL, MODEL_PREFIX)):
-    info("creating vocabular for " + str(level) + ' ' + model_name + ' in ')
-    training_docs_iterator = BatchWrapper(training_preprocessed_files_prefix, batch_size=10000, level=level,
+    info("creating vocabulary for " + str(level) + ' ' + model_name + ' in ')
+    training_docs_iterator = BatchWrapper(training_preprocessed_files_prefix, text_batch_size=10000, level=level,
                                           level_type=model_name)
     doc2vec_model.build_vocab(sentences=training_docs_iterator, progress_per=REPORT_VOCAB_PROGRESS)
     doc2vec_model.save(os.path.join(doc2vec_model_save_location, VOCAB_MODEL, MODEL_PREFIX))
 else:
-    info("loading " + os.path.join(doc2vec_model_save_location, VOCAB_MODEL, MODEL_PREFIX))
+    info("loading vocabulary " + os.path.join(doc2vec_model_save_location, VOCAB_MODEL, MODEL_PREFIX))
     doc2vec_vocab_model = Doc2Vec.load(
         os.path.join(doc2vec_model_save_location, VOCAB_MODEL, MODEL_PREFIX)
     )
@@ -149,10 +119,6 @@ else:
 doc2vec_model.alpha = 0.025
 doc2vec_model.min_alpha = 0.025
 DOC2VEC_ALPHA_DECREASE = 0.001
-epoch_validation_metrics = []
-epoch_training_metrics = []
-epoch_word2vec_metrics = []
-epoch = 0
 start_epoch = 1
 
 for epoch in range(1, DOC2VEC_MAX_EPOCHS + 1):
@@ -171,12 +137,14 @@ if start_epoch > 1:
     start_epoch += 1
 
 
+## The Actual Training
+
 for epoch in range(start_epoch, DOC2VEC_MAX_EPOCHS + 1):
     # set new filename/path to include the epoch
     GLOBAL_VARS.MODEL_NAME = placeholder_model_name.format(epoch)
     info("****************** Epoch {} --- Working on {} *******************".format(epoch, GLOBAL_VARS.MODEL_NAME))
     # train the doc2vec model
-    training_docs_iterator = BatchWrapper(training_preprocessed_files_prefix, batch_size=10000, level=level,
+    training_docs_iterator = BatchWrapper(training_preprocessed_files_prefix, text_batch_size=10000, level=level,
                                           level_type=model_name)
     doc2vec_model.train(sentences=training_docs_iterator, report_delay=REPORT_DELAY)
     doc2vec_model.alpha -= DOC2VEC_ALPHA_DECREASE  # decrease the learning rate
@@ -185,7 +153,7 @@ for epoch in range(start_epoch, DOC2VEC_MAX_EPOCHS + 1):
     doc2vec_model.save(os.path.join(doc2vec_model_save_location, GLOBAL_VARS.MODEL_NAME, MODEL_PREFIX))
 
 
-if epoch != 8:
+if epoch != DOC2VEC_MAX_EPOCHS:
     print("still training epochs missing: " + str(epoch))
     sys.exit(1)
 
@@ -197,8 +165,8 @@ class DocReader(Process):
         self.num_reader = num_reader
         self.inference_docs_iterator = BatchWrapper(
             preprocessed_files_prefix,
-            batch_size=None,
-            buffer_size=10000,
+            text_batch_size=None,
+            buffer_size=READ_QUEUE_SIZE,
             level=level,
             level_type=level_type)
 
@@ -235,14 +203,15 @@ def get_extended_docs_with_inference_data_only(doc2vec_model, file_to_write, pre
     if os.path.exists(os.path.join(doc2vec_model_save_location, GLOBAL_VARS.MODEL_NAME, file_to_write)):
         info("===== Loading inference vectors")
         info(os.path.join(doc2vec_model_save_location, GLOBAL_VARS.MODEL_NAME, file_to_write))
-        inference_documents_reps = pickle.load(io.BufferedReader(gzip.open(os.path.join(doc2vec_model_save_location, GLOBAL_VARS.MODEL_NAME, file_to_write))))
+        inference_documents_reps = pickle.load(io.BufferedReader(gzip.open(os.path.join(doc2vec_model_save_location,
+                                                                            GLOBAL_VARS.MODEL_NAME, file_to_write))))
         info("Loaded inference vectors matrix")
     else:
         inference_documents_reps = {}
         info("===== Getting vectors with inference")
         processes = []
-        out_queue = Queue(maxsize=10000)
-        in_queue = Queue(maxsize=10000)
+        out_queue = Queue(maxsize=READ_QUEUE_SIZE)
+        in_queue = Queue(maxsize=READ_QUEUE_SIZE)
         reader = DocReader(level, level_type, preprocessed_files_prefix, in_queue, num_reader=NUM_CORES)
         reader.start()
         for process_id in range(1, NUM_CORES + 1):
@@ -271,4 +240,3 @@ Xv = get_extended_docs_with_inference_data_only(doc2vec_model, VALIDATION_DICT, 
 Xt = get_extended_docs_with_inference_data_only(doc2vec_model, TEST_DICT, test_preprocessed_files_prefix,
                                                 level=level,
                                                 level_type=model_name)
-

@@ -9,7 +9,7 @@ from logging import info
 
 from multiprocessing import Pool as ThreadPool
 
-from text import get_sentences, sentence_wordtokenizer
+from text import sentence_wordtokenizer
 from parse_utils import *
 
 
@@ -42,10 +42,10 @@ CLAIMS_PART_ID = "{}_claims_part-{}"
 
 BATCH_SIZE = 10000
 
-preprocessed_location = root_location + "preprocessed_data/extended_pv_abs_desc_claims_full_chunks/"
-TRAINING_PREPROCESSED_FILES_PREFIX = preprocessed_location + "extended_pv_training_docs_data_preprocessed-"
-VALIDATION_PREPROCESSED_FILES_PREFIX = preprocessed_location + "extended_pv_validation_docs_data_preprocessed-"
-TEST_PREPROCESSED_FILES_PREFIX = preprocessed_location + "extended_pv_test_docs_data_preprocessed-"
+preprocessed_location = root_location + "preprocessed_data/separated_datasets/"
+TRAINING_PREPROCESSED_FILES_PREFIX = os.path.join(preprocessed_location, "training_docs_data_preprocessed-")
+VALIDATION_PREPROCESSED_FILES_PREFIX = os.path.join(preprocessed_location, "validation_docs_data_preprocessed-")
+TEST_PREPROCESSED_FILES_PREFIX = os.path.join(preprocessed_location, "test_docs_data_preprocessed-")
 
 if not os.path.exists(preprocessed_location):
     os.makedirs(preprocessed_location)

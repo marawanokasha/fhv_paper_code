@@ -41,8 +41,6 @@ svm_location = root_location + "svm_lda_results/"
 classifications_index_file = os.path.join(exports_location, "classifications_index.pkl")
 doc_classification_map_file = os.path.join(exports_location, "doc_classification_map.pkl")
 sections_file = os.path.join(exports_location, "sections.pkl")
-classes_file = os.path.join(exports_location, "classes.pkl")
-subclasses_file = os.path.join(exports_location, "subclasses.pkl")
 valid_classes_file = os.path.join(exports_location, "valid_classes.pkl")
 valid_subclasses_file = os.path.join(exports_location, "valid_subclasses.pkl")
 classifications_file = os.path.join(exports_location, "classifications.pkl")
@@ -54,10 +52,8 @@ test_docs_list_file = os.path.join(exports_location, "test_docs_list.pkl")
 
 ## Load utility data
 
-# doc_classification_map = pickle.load(open(doc_classification_map_file))
+doc_classification_map = pickle.load(open(doc_classification_map_file))
 sections = pickle.load(open(sections_file))
-classes = pickle.load(open(classes_file))
-subclasses = pickle.load(open(subclasses_file))
 valid_classes = pickle.load(open(valid_classes_file))
 valid_subclasses = pickle.load(open(valid_subclasses_file))
 training_docs_list = pickle.load(open(training_docs_list_file))

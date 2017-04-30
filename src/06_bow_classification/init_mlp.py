@@ -1,6 +1,5 @@
 import os
 import sys
-from collections import namedtuple
 
 sys.path.append(os.path.abspath('..'))
 from utils.metrics import get_metrics, get_binary_0_5
@@ -15,9 +14,7 @@ for handler in root.handlers[:]:
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO) # adds a default StreamHanlder
 
 
-RANDOM_SEED = 10000
 NN_SEED = 1234
-random.seed(RANDOM_SEED)
 np.random.seed(NN_SEED)
 
 MAX_TERMS = 10000
@@ -30,10 +27,9 @@ root_location = "../../data/"
 exports_location = root_location + "exported_data/"
 nn_parameter_search_location = os.path.join(root_location, "nn_bow_parameter_search")
 
+classifications_index_file = os.path.join(exports_location, "classifications_index.pkl")
 doc_classification_map_file = os.path.join(exports_location, "doc_classification_map.pkl")
 sections_file = os.path.join(exports_location, "sections.pkl")
-classes_file = os.path.join(exports_location, "classes.pkl")
-subclasses_file = os.path.join(exports_location, "subclasses.pkl")
 valid_classes_file = os.path.join(exports_location, "valid_classes.pkl")
 valid_subclasses_file = os.path.join(exports_location, "valid_subclasses.pkl")
 classifications_file = os.path.join(exports_location, "classifications.pkl")
@@ -47,8 +43,6 @@ test_docs_list_file = os.path.join(exports_location, "test_docs_list.pkl")
 
 doc_classification_map = pickle.load(open(doc_classification_map_file))
 sections = pickle.load(open(sections_file))
-classes = pickle.load(open(classes_file))
-subclasses = pickle.load(open(subclasses_file))
 valid_classes = pickle.load(open(valid_classes_file))
 valid_subclasses = pickle.load(open(valid_subclasses_file))
 training_docs_list = pickle.load(open(training_docs_list_file))
@@ -200,7 +194,7 @@ if DO_TEST == False:
 
         early_stopper = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=EARLY_STOPPER_MIN_DELTA, \
                                                       patience=EARLY_STOPPER_PATIENCE, verbose=1, mode='auto')
-        metrics_callback = MetricsCallbackWithGenerator(classifications_type)
+        metrics_callback = MetricsCallbackWithGenerator(classifications_type, NN_BATCH_SIZE, Xv, yv)
 
         history = model.fit_generator(generator=nn_batch_generator(X, y, NN_BATCH_SIZE), \
                                             samples_per_epoch=X.shape[0],\
