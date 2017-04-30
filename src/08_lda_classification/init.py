@@ -19,16 +19,13 @@ from utils.file import ensure_disk_location_exists
 root = logging.getLogger()
 for handler in root.handlers[:]:
     root.removeHandler(handler)
-
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO) # adds a default StreamHanlder
-#root.addHandler(logging.StreamHandler())
 
 
 RANDOM_SEED = 10000
 random.seed(RANDOM_SEED)
 
 SVM_SEED = 1234
-
 
 CLASSIFIER_FILE = '{}_classifier.pkl'
 VALIDATION_METRICS_FILENAME= '{}_validation_metrics.pkl'
@@ -38,7 +35,8 @@ TEST_METRICS_FILENAME = '{}_test_metrics.pkl'
 
 root_location = "../../data/"
 exports_location = root_location + "exported_data/"
-svm_location = root_location + "svm_bow_results/"
+lda_location = root_location + "extended_pv_lda/"
+svm_location = root_location + "svm_lda_results/"
 
 classifications_index_file = os.path.join(exports_location, "classifications_index.pkl")
 doc_classification_map_file = os.path.join(exports_location, "doc_classification_map.pkl")
@@ -56,7 +54,7 @@ test_docs_list_file = os.path.join(exports_location, "test_docs_list.pkl")
 
 ## Load utility data
 
-doc_classification_map = pickle.load(open(doc_classification_map_file))
+# doc_classification_map = pickle.load(open(doc_classification_map_file))
 sections = pickle.load(open(sections_file))
 classes = pickle.load(open(classes_file))
 subclasses = pickle.load(open(subclasses_file))
@@ -95,14 +93,25 @@ classifications = classification_types[classifications_type]
 data_type = args.dataType
 SVM_MODEL_NAME = 'svm_iter_{}_reg_{}_classweights_{}'.format(SVM_ITERATIONS, SVM_REG, str(SVM_CLASS_WEIGHTS))
 
+LDA_TOPICS = 1000
+LDA_ITERATIONS = 50
+LDA_BATCH_SIZE = 4096
+LDA_DECAY = 0.5
+LDA_EVALUATE_EVERY = 1000
+LDA_VERBOSE = 2
+LDA_LEARNING_METHOD = 'online'
+LDA_MODEL_NAME = "lda_{}_topics_{}_iter_{}_batch_{}_decay_{}_evaluate-every_{}".format(LDA_LEARNING_METHOD,
+                                                                                       LDA_TOPICS, LDA_ITERATIONS,
+                                                                                       LDA_BATCH_SIZE, LDA_DECAY,
+                                                                                       LDA_EVALUATE_EVERY)
 
 info("=============== Classifying using data: {} ================".format(data_type))
 
-data_training_location = os.path.join(exports_location, "{}_training_sparse_data.pkl".format(data_type))
+data_training_location = os.path.join(lda_location, LDA_MODEL_NAME, data_type, "lda_training_data.pkl")
 data_training_docids_location = os.path.join(exports_location, "{}_training_sparse_docids.pkl".format(data_type))
-data_validation_location = os.path.join(exports_location, "{}_validation_sparse_data.pkl".format(data_type))
+data_validation_location = os.path.join(lda_location, LDA_MODEL_NAME, data_type, "lda_validation_data.pkl")
 data_validation_docids_location = os.path.join(exports_location, "{}_validation_sparse_docids.pkl".format(data_type))
-data_test_location = os.path.join(exports_location, "{}_test_sparse_data.pkl".format(data_type))
+data_test_location = os.path.join(lda_location, LDA_MODEL_NAME, data_type, "lda_test_data.pkl")
 data_test_docids_location = os.path.join(exports_location, "{}_test_sparse_docids.pkl".format(data_type))
 
 
@@ -111,9 +120,6 @@ info('Getting Training Data')
 X = pickle.load(open(data_training_location, "r"))
 training_data_docids = pickle.load(open(data_training_docids_location, "r"))
 y = get_label_data(classifications, training_data_docids, doc_classification_map)
-
-print y
-print y.shape
 
 info('Training Classifier')
 clf = OneVsRestClassifier(linear_model.SGDClassifier(loss='hinge', penalty='l2',

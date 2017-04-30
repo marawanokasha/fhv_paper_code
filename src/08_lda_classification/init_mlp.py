@@ -23,12 +23,13 @@ np.random.seed(NN_SEED)
 MAX_TERMS = 10000
 
 GLOBAL_VARS = namedtuple('GLOBAL_VARS', ['MODEL_NAME', 'NN_MODEL_NAME'])
-NN_PARAMETER_SEARCH_PREFIX = "nn_bow_{}_batch_{}_nn_parameter_searches.pkl"
+NN_PARAMETER_SEARCH_PREFIX = "nn_lda_{}_batch_{}_nn_parameter_searches.pkl"
 
 
 root_location = "../../data/"
 exports_location = root_location + "exported_data/"
-nn_parameter_search_location = os.path.join(root_location, "nn_bow_parameter_search")
+lda_location = root_location + "extended_pv_lda/"
+nn_parameter_search_location = os.path.join(root_location, "nn_lda_parameter_search")
 
 doc_classification_map_file = os.path.join(exports_location, "doc_classification_map.pkl")
 sections_file = os.path.join(exports_location, "sections.pkl")
@@ -45,7 +46,7 @@ test_docs_list_file = os.path.join(exports_location, "test_docs_list.pkl")
 
 ## Load utility data
 
-doc_classification_map = pickle.load(open(doc_classification_map_file))
+# doc_classification_map = pickle.load(open(doc_classification_map_file))
 sections = pickle.load(open(sections_file))
 classes = pickle.load(open(classes_file))
 subclasses = pickle.load(open(subclasses_file))
@@ -66,7 +67,7 @@ activations = ['relu','sigmoid', 'tanh']
 
 # specify on command line the SVM parameters and the bow representation to use
 
-parser = argparse.ArgumentParser(description='Run MLP on BOW data')
+parser = argparse.ArgumentParser(description='Run MLP on LDA data')
 parser.add_argument("-c", "--classificationsType", choices=classification_types.keys(), required=True)
 parser.add_argument("-d", "--dataType", choices=possible_data_types, required=True)
 parser.add_argument("-t", "--doTest", action="store_true", help="Whether to do testing or parameter searching")
@@ -87,11 +88,23 @@ data_type = args.dataType
 DO_TEST = args.doTest
 
 
-data_training_location = os.path.join(exports_location, "{}_training_sparse_data.pkl".format(data_type))
+LDA_TOPICS = 1000
+LDA_ITERATIONS = 50
+LDA_BATCH_SIZE = 4096
+LDA_DECAY = 0.5
+LDA_EVALUATE_EVERY = 1000
+LDA_VERBOSE = 2
+LDA_LEARNING_METHOD = 'online'
+LDA_MODEL_NAME = "lda_{}_topics_{}_iter_{}_batch_{}_decay_{}_evaluate-every_{}".format(LDA_LEARNING_METHOD,
+                                                                                       LDA_TOPICS, LDA_ITERATIONS,
+                                                                                       LDA_BATCH_SIZE, LDA_DECAY,
+                                                                                       LDA_EVALUATE_EVERY)
+
+data_training_location = os.path.join(lda_location, LDA_MODEL_NAME, data_type, "lda_training_data.pkl")
 data_training_docids_location = os.path.join(exports_location, "{}_training_sparse_docids.pkl".format(data_type))
-data_validation_location = os.path.join(exports_location, "{}_validation_sparse_data.pkl".format(data_type))
+data_validation_location = os.path.join(lda_location, LDA_MODEL_NAME, data_type, "lda_validation_data.pkl")
 data_validation_docids_location = os.path.join(exports_location, "{}_validation_sparse_docids.pkl".format(data_type))
-data_test_location = os.path.join(exports_location, "{}_test_sparse_data.pkl".format(data_type))
+data_test_location = os.path.join(lda_location, LDA_MODEL_NAME, data_type, "lda_test_data.pkl")
 data_test_docids_location = os.path.join(exports_location, "{}_test_sparse_docids.pkl".format(data_type))
 
 
@@ -271,6 +284,7 @@ else:
     )
     if second_hidden_dropout_do:
         GLOBAL_VARS.NN_MODEL_NAME = GLOBAL_VARS.NN_MODEL_NAME + '_2nd-hid-drop_{}'.format(str(second_hidden_dropout_do))
+
     if GLOBAL_VARS.NN_MODEL_NAME not in param_results_dict.keys():
         print "Can't find model: {}".format(GLOBAL_VARS.NN_MODEL_NAME)
         raise Exception()
