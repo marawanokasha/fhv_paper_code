@@ -58,7 +58,7 @@ test_docs_list_file = os.path.join(exports_location, "test_docs_list.pkl")
 
 ## Load utility data
 
-# doc_classification_map = pickle.load(open(doc_classification_map_file))
+doc_classification_map = pickle.load(open(doc_classification_map_file))
 sections = pickle.load(open(sections_file))
 valid_classes = pickle.load(open(valid_classes_file))
 valid_subclasses = pickle.load(open(valid_subclasses_file))
@@ -68,7 +68,7 @@ test_docs_list = pickle.load(open(test_docs_list_file))
 
 
 parser = argparse.ArgumentParser(description='Create FHV matrices for the different levels')
-parser.add_argument("-l", "--level", type=int)
+parser.add_argument("-l", "--level", type=int, help="FHV level to create the matrix for")
 args = parser.parse_args()
 
 print args

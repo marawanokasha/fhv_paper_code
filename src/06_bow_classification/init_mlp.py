@@ -1,5 +1,11 @@
 import os
 import sys
+import time
+import cPickle as pickle
+import argparse
+import logging
+from collections import namedtuple
+from sklearn.model_selection import ParameterSampler
 
 sys.path.append(os.path.abspath('..'))
 from utils.metrics import get_metrics, get_binary_0_5
@@ -64,7 +70,7 @@ parser = argparse.ArgumentParser(description='Run MLP on BOW data')
 parser.add_argument("-c", "--classificationsType", choices=classification_types.keys(), required=True)
 parser.add_argument("-d", "--dataType", choices=possible_data_types, required=True)
 parser.add_argument("-t", "--doTest", action="store_true", help="Whether to do testing or parameter searching")
-parser.add_argument("--testInputDropout", required=False, help="Input Dropout")
+parser.add_argument("--testInputDropout", action="store_true", required=False, help="Input Dropout")
 parser.add_argument("--test1stActivation", required=False, help="1st layer activation function", choices=activations)
 parser.add_argument("--test1stSize", required=False, help="1st layer size", type=int)
 parser.add_argument("--test1stDropout", action="store_true", help="1st layer dropout")
@@ -236,7 +242,7 @@ if DO_TEST == False:
                                                                        NN_PARAMETER_SEARCH_PREFIX.format(classifications_type, NN_BATCH_SIZE))), 'w'))
 
 else:
-    info('Doing Testing')
+    info('=================== Doing Testing')
     TEST_METRICS_FILENAME = '{}_batch_{}_test_metrics.pkl'.format(classifications_type, NN_BATCH_SIZE)
     GLOBAL_VARS.MODEL_NAME = data_type + "/size_{}".format(MAX_TERMS)
     param_results_dict = pickle.load(open(os.path.join(os.path.join(nn_parameter_search_location, GLOBAL_VARS.MODEL_NAME,

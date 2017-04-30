@@ -1,26 +1,16 @@
 import os
 import sys
-import time
-from collections import namedtuple, defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
-import random
-import cPickle as pickle
-import argparse
-import logging
 from logging import info
 
 import keras
-from keras.layers import Input, Dense, Dropout, Masking
-from keras.models import Model, Sequential
-from keras.layers import Input
+from keras.layers import Input, Dense, Dropout
+from keras.models import Model
 
-from sklearn.model_selection import ParameterSampler
 
 sys.path.append(os.path.abspath('..'))
 from utils.metrics import get_metrics, get_binary_0_5
-from utils.classification import get_label_data
-from utils.file import ensure_disk_location_exists
 
 
 # ranges for learning graph shown
@@ -35,10 +25,13 @@ class MetricsCallbackWithGenerator(keras.callbacks.Callback):
     Callback called by keras after each epoch. Records the best validation loss and periodically checks the
     validation metrics
     """
-    def __init__(self, classifications_type):
+    def __init__(self, classifications_type, batch_size, Xv, yv):
         MetricsCallbackWithGenerator.EPOCHS_BEFORE_VALIDATION = 10
         MetricsCallbackWithGenerator.GRAPH_MIN = metrics_graph_ranges[classifications_type]['min']
         MetricsCallbackWithGenerator.GRAPH_MAX = metrics_graph_ranges[classifications_type]['max']
+        self.batch_size = batch_size
+        self.Xv = Xv
+        self.yv = yv
 
     def on_train_begin(self, logs={}):
         self.epoch_index = 0
@@ -72,11 +65,11 @@ class MetricsCallbackWithGenerator(keras.callbacks.Callback):
 
                 info('Validation Loss Reduced {} times'.format(self.val_loss_reductions))
                 info('Evaluating on Validation Data')
-                yvp = self.model.predict_generator(generator=nn_batch_generator(Xv, yv, NN_BATCH_SIZE),
-                                                   val_samples=Xv.shape[0])
+                yvp = self.model.predict_generator(generator=nn_batch_generator(self.Xv, self.yv, self.batch_size),
+                                                   val_samples=self.Xv.shape[0])
                 yvp_binary = get_binary_0_5(yvp)
                 info('Generating Validation Metrics')
-                validation_metrics = get_metrics(yv, yvp, yvp_binary)
+                validation_metrics = get_metrics(self.yv, yvp, yvp_binary)
                 print "****** Validation Metrics: Cov Err: {:.3f} | Top 3: {:.3f} | Top 5: {:.3f} | F1 Micro: {:.3f} | F1 Macro: {:.3f}".format(
                     validation_metrics['coverage_error'], validation_metrics['top_3'], validation_metrics['top_5'],
                     validation_metrics['f1_micro'], validation_metrics['f1_macro'])
