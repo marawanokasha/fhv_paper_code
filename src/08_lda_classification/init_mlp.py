@@ -69,7 +69,7 @@ classification_types = {
 possible_data_types = ["tf", "sublinear_tf", "tf_idf", "sublinear_tf_idf","bm25"]
 activations = ['relu','sigmoid', 'tanh']
 
-# specify on command line the SVM parameters and the bow representation to use
+# specify on command line the NN parameters and the bow representation to use
 
 parser = argparse.ArgumentParser(description='Run MLP on LDA data')
 parser.add_argument("-c", "--classificationsType", choices=classification_types.keys(), required=True)

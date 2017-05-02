@@ -11,6 +11,7 @@ from postings_util import merge_postings, create_doc_index, get_chi_index, get_t
 
 sys.path.append(os.path.abspath('..'))
 from utils.text import simple_tokenizer
+from utils.file import ensure_disk_location_exists
 
 root = logging.getLogger()
 for handler in root.handlers[:]:
@@ -45,6 +46,7 @@ test_docs_list_file = os.path.join(exports_location, "test_docs_list.pkl")
 docs_only_preprocessed_file = os.path.join(root_location,"preprocessed_data", "docs_only_file.txt")
 bow_data_location = os.path.join(root_location, "bow_data")
 
+ensure_disk_location_exists(bow_data_location)
 
 ## Load utility data
 
@@ -102,7 +104,6 @@ data_type_postings = [
     ("validation", validation_min_doc_postings_lists),
     ("test", test_min_doc_postings_lists)
 ]
-
 
 for data_type, doc_postings_list in data_type_postings:
     tf_postings = doc_postings_list

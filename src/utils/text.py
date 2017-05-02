@@ -32,29 +32,6 @@ sentence_tokenizer._params.abbrev_types.update(extra_abbrv)
 
 abbrev_types_set = set(sentence_tokenizer._params.abbrev_types)
 
-def stemtokenizer(text):
-    """ MAIN FUNCTION to get clean stems out of a text. A list of clean stems are returned """
-    tokenizer = RegexpTokenizer(r'\s+', gaps=True)
-    tokens = tokenizer.tokenize(text)
-    stems = []  # result
-    for token in tokens:
-        stem = token.lower()
-        stem = stem.strip(string.punctuation)
-        if stem:
-            if is_number(stem):
-                stem = NUMBER_INDICATOR
-            elif is_currency(stem):
-                stem = CURRENCY_INDICATOR
-            elif is_chemical(stem):
-                stem = CHEMICAL_INDICATOR
-            else:
-                stem = stem.strip(string.punctuation)
-            if stem and len(stem) >= MIN_SIZE:
-                # extract uni-grams
-                stems.append(stem)
-    del tokens
-    return stems
-
 punctuation_to_strip = u'"#%&\'();:*+-/<=>@[\\]^_`{|}~'
 punctuation_to_strip += u'\u2018\u2019\u201c\u201d' # additional punctuation not in string.punctuation
 # \u2018 => ‘ \u2019 => ’ \u201c => “ \u201d => ”

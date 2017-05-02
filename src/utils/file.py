@@ -2,7 +2,6 @@ import os
 import re
 
 def get_subdirectories(d):
-    #return filter(os.path.isdir, [f for f in os.listdir(d)])
     return [f for f in os.listdir(d) if os.path.isdir(os.path.join(d,f))]
 
 

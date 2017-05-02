@@ -62,7 +62,7 @@ classification_types = {
     "subclasses": valid_subclasses
 }
 
-# specify on command line the SVM parameters and the bow representation to use
+# specify on command line the NN parameters and the classifications to use
 
 parser = argparse.ArgumentParser(description='Run LSTM on FHV data')
 parser.add_argument("-c", "--classificationsType", choices=classification_types.keys(), required=True)

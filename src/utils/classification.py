@@ -7,7 +7,9 @@ from keras.layers.recurrent import LSTM
 
 
 class OneHotEncoder():
-
+    """
+    Does one hot encoding for a list of labels
+    """
     def __init__(self, classifications):
         self.classifications = classifications
         self.one_hot_indices = {}
@@ -30,6 +32,13 @@ class OneHotEncoder():
         return output_vector
 
 def get_label_data(classifications, doc_ids, doc_classification_map):
+    """
+    return a Y label matrix for some given doc_ids and classification
+    :param classifications: a list of classifications to one hot encode ex. sections, classes, subclasses
+    :param doc_ids:
+    :param doc_classification_map:
+    :return:
+    """
     one_hot_encoder = OneHotEncoder(classifications)
     classifications_set = set(classifications)
     data_labels = []
@@ -45,7 +54,9 @@ def create_keras_nn_model(input_size, output_size,
                           first_hidden_layer_size, first_hidden_layer_activation,
                           second_hidden_layer_size, second_hidden_layer_activation,
                           input_dropout_do, hidden_dropout_do, second_hidden_dropout_do=False):
-
+    """
+    Creates an MLP keras Model
+    """
     doc_input = Input(shape=(input_size,), name='doc_input')
     if input_dropout_do:
         hidden = Dropout(0.7)(doc_input)
@@ -69,8 +80,9 @@ def create_keras_nn_model(input_size, output_size,
 
 def create_keras_rnn_model(input_size, sequence_size, output_size, lstm_output_size, w_dropout_do, u_dropout_do,
                                stack_layers=1, conv_size=None, conv_filter_length=3, max_pooling_length=None):
-
-
+    """
+    Creates an LSTM keras Model
+    """
     model = Sequential()
     if conv_size:
         model.add(Convolution1D(nb_filter=conv_size, input_shape=(sequence_size, input_size), filter_length=conv_filter_length,
