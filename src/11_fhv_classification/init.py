@@ -142,9 +142,9 @@ if DO_TEST == False:
     conv_filter_length_options = [None]
     conv_max_pooling_length_options = [None]
 
-    X_file, y_file = get_data_dirs(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
+    X_file, y_file = get_data_files(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
                                    classifications_type, PARTS_LEVEL, 'training')
-    Xv_file, yv_file = get_data_dirs(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
+    Xv_file, yv_file = get_data_files(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
                                      classifications_type, PARTS_LEVEL, 'validation')
     X, y = get_data(X_file, y_file, mmap=True)
     Xv, yv = get_data(Xv_file, yv_file, mmap=True)
@@ -271,7 +271,7 @@ else:
     param_results_dict = pickle.load(open(param_results_path))
     # Get the test data
     info('Getting Test Data')
-    Xt_file, yt_file = get_data_dirs(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
+    Xt_file, yt_file = get_data_files(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
                                      classifications_type, PARTS_LEVEL, 'test')
     Xt, yt = get_data(Xt_file, yt_file, mmap=True)
 

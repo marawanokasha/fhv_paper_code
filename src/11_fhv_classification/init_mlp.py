@@ -143,9 +143,9 @@ if DO_TEST == False:
     hidden_dropout_options = [True]
     second_hidden_dropout_options = [False]
 
-    X_file, y_file = get_data_dirs(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
+    X_file, y_file = get_data_files(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
                                    classifications_type, PARTS_LEVEL, 'training')
-    Xv_file, yv_file = get_data_dirs(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
+    Xv_file, yv_file = get_data_files(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
                                      classifications_type, PARTS_LEVEL, 'validation')
     X, y = get_data(X_file, y_file, mmap=True)
     Xv, yv = get_data(Xv_file, yv_file, mmap=True)
@@ -232,7 +232,6 @@ if DO_TEST == False:
             max_q_size=QUEUE_SIZE,
             val_samples=len(validation_docs_list))
         yvp_binary = get_binary_0_5(yvp)
-        Xv, yv = get_data(Xv_file, yv_file, mmap=True)
         info('Generating Validation Metrics')
         validation_metrics = get_metrics(yv, yvp, yvp_binary)
         print "****** Validation Metrics: Cov Err: {:.3f} | Top 3: {:.3f} | Top 5: {:.3f} | F1 Micro: {:.3f} | F1 Macro: {:.3f}".format(
@@ -275,7 +274,7 @@ else:
     param_results_dict = pickle.load(open(param_results_path))
     # Get the test data
     info('Getting Test Data')
-    Xt_file, yt_file = get_data_dirs(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
+    Xt_file, yt_file = get_data_files(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
                                      classifications_type, PARTS_LEVEL, 'test')
     Xt, yt = get_data(Xt_file, yt_file, mmap=True)
 
@@ -284,8 +283,8 @@ else:
 
     first_hidden_layer_size = args.test1stSize
     first_hidden_layer_activation = args.test1stActivation
-    second_hidden_layer_size = args.test1stActivation
-    second_hidden_layer_activation = args.test1stActivation
+    second_hidden_layer_size = args.test2ndSize
+    second_hidden_layer_activation = args.test2ndActivation
     input_dropout_do = args.testInputDropout
     hidden_dropout_do = args.test1stDropout
     second_hidden_dropout_do = args.test2ndDropout

@@ -31,23 +31,29 @@ TEST_DATA_MATRIX = "Xt_level_{}.npy"
 TEST_LABELS_MATRIX = "yt_{}.npy"
 
 
-data_type_file_dict ={
+data_type_file_dict = {
     "training": TRAINING_DATA_MATRIX,
     "validation": VALIDATION_DATA_MATRIX,
-    "test": TEST_DATA_MATRIX,
+    "test": TEST_DATA_MATRIX
 }
-labels_type_file_dict ={
+labels_type_file_dict = {
     "training": TRAINING_LABELS_MATRIX,
     "validation": VALIDATION_LABELS_MATRIX,
-    "test": TEST_LABELS_MATRIX,
+    "test": TEST_LABELS_MATRIX
 }
 
-def get_data_dirs(base_location, classifications_type, level, data_type):
-    data_dir = os.path.join(base_location, data_type_file_dict[data_type].format(level))
-    labels_dir = os.path.join(base_location, labels_type_file_dict[data_type].format(classifications_type))
-    return data_dir, labels_dir
+def get_data_files(base_location, classifications_type, level, data_type):
+    """
+    get the files to load the data from for a certain classification type, level and data type
+    """
+    data_file = os.path.join(base_location, data_type_file_dict[data_type].format(level))
+    labels_file = os.path.join(base_location, labels_type_file_dict[data_type].format(classifications_type))
+    return data_file, labels_file
 
 def get_data(data_file, labels_file, mmap=False):
+    """
+    load np data with a certain mmap configuration
+    """
     mmap_mode = None
     if mmap == True:
         mmap_mode = "r"
@@ -102,7 +108,7 @@ class MetricsCallback(keras.callbacks.Callback):
 
                 info('Validation Loss Reduced {} times'.format(self.val_loss_reductions))
                 info('Evaluating on Validation Data')
-                Xv_file, yv_file = get_data_dirs(self.classifications_type, self.level, 'validation')
+                Xv_file, yv_file = get_data_files(self.classifications_type, self.level, 'validation')
                 Xv, yv = get_data(Xv_file, yv_file, mmap=True)
                 yvp = self.model.predict_generator(generator=batch_generator(self.classifications_type, self.level,
                                                    self.batch_size, is_mlp=self.is_mlp, validate=True),\

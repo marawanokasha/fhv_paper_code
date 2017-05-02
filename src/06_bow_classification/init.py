@@ -106,8 +106,6 @@ X = pickle.load(open(data_training_location, "r"))
 training_data_docids = pickle.load(open(data_training_docids_location, "r"))
 y = get_label_data(classifications, training_data_docids, doc_classification_map)
 
-print y
-print y.shape
 
 info('Training Classifier')
 clf = OneVsRestClassifier(linear_model.SGDClassifier(loss='hinge', penalty='l2',

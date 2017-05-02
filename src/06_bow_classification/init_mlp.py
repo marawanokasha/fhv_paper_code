@@ -258,8 +258,8 @@ else:
 
     first_hidden_layer_size = args.test1stSize
     first_hidden_layer_activation = args.test1stActivation
-    second_hidden_layer_size = args.test1stActivation
-    second_hidden_layer_activation = args.test1stActivation
+    second_hidden_layer_size = args.test2ndSize
+    second_hidden_layer_activation = args.test2ndActivation
     input_dropout_do = args.testInputDropout
     hidden_dropout_do = args.test1stDropout
     second_hidden_dropout_do = args.test2ndDropout
