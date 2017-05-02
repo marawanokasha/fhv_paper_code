@@ -208,7 +208,8 @@ if DO_TEST == False:
 
         early_stopper = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=EARLY_STOPPER_MIN_DELTA,
                                                       patience=EARLY_STOPPER_PATIENCE, verbose=1, mode='auto')
-        metrics_callback = MetricsCallback(classifications_type, PARTS_LEVEL, NN_BATCH_SIZE, is_mlp=False)
+        metrics_callback = MetricsCallback(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
+                                           classifications_type, PARTS_LEVEL, NN_BATCH_SIZE, is_mlp=False)
 
         # Model Fitting
         history = model.fit_generator(

@@ -99,8 +99,8 @@ data_test_docids_location = os.path.join(exports_location, "{}_test_sparse_docid
 info('Getting Training Data')
 X = pickle.load(open(data_training_location, "r"))
 info('Doing LDA decomposition')
-lda = LatentDirichletAllocation(n_topics=LDA_TOPICS, max_iter=LDA_ITERATIONS, learning_method=LDA_LEARNING_METHOD, \
-                               learning_decay=LDA_DECAY, batch_size=LDA_BATCH_SIZE, \
+lda = LatentDirichletAllocation(n_topics=LDA_TOPICS, max_iter=LDA_ITERATIONS, learning_method=LDA_LEARNING_METHOD,
+                               learning_decay=LDA_DECAY, batch_size=LDA_BATCH_SIZE,
                                 evaluate_every=LDA_EVALUATE_EVERY, n_jobs=NUM_CORES, verbose=LDA_VERBOSE, random_state=LDA_SEED)
 lda.fit(X)
 

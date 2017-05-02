@@ -67,10 +67,11 @@ class MetricsCallback(keras.callbacks.Callback):
     Callback called by keras after each epoch. Records the best validation loss and periodically checks the
     validation metrics
     """
-    def __init__(self, classifications_type, level, batch_size, is_mlp=False):
+    def __init__(self, base_load_directory, classifications_type, level, batch_size, is_mlp=False):
         MetricsCallback.EPOCHS_BEFORE_VALIDATION = 10
         MetricsCallback.GRAPH_MIN = metrics_graph_ranges[classifications_type]['min']
         MetricsCallback.GRAPH_MAX = metrics_graph_ranges[classifications_type]['max']
+        self.base_load_directory = base_load_directory
         self.classifications_type = classifications_type
         self.level = level
         self.batch_size = batch_size
@@ -108,11 +109,11 @@ class MetricsCallback(keras.callbacks.Callback):
 
                 info('Validation Loss Reduced {} times'.format(self.val_loss_reductions))
                 info('Evaluating on Validation Data')
-                Xv_file, yv_file = get_data_files(self.classifications_type, self.level, 'validation')
+                Xv_file, yv_file = get_data_files(self.base_load_directory, self.classifications_type, self.level, 'validation')
                 Xv, yv = get_data(Xv_file, yv_file, mmap=True)
-                yvp = self.model.predict_generator(generator=batch_generator(self.classifications_type, self.level,
-                                                   self.batch_size, is_mlp=self.is_mlp, validate=True),\
-                                                   max_q_size=QUEUE_SIZE,\
+                yvp = self.model.predict_generator(generator=batch_generator(Xv_file, yv_file,
+                                                   self.batch_size, is_mlp=self.is_mlp, validate=True),
+                                                   max_q_size=QUEUE_SIZE,
                                                    val_samples=yv.shape[1])
                 yvp_binary = get_binary_0_5(yvp)
                 info('Generating Validation Metrics')
@@ -121,7 +122,6 @@ class MetricsCallback(keras.callbacks.Callback):
                     validation_metrics['coverage_error'], validation_metrics['top_3'], validation_metrics['top_5'],
                     validation_metrics['f1_micro'], validation_metrics['f1_macro'])
                 self.metrics_dict[self.epoch_index] = validation_metrics
-#                 self.best_validation_metrics = validation_metrics
 
 
 class ArrayReader(Process):

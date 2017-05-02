@@ -198,15 +198,15 @@ if DO_TEST == False:
                                       input_dropout_do, hidden_dropout_do, second_hidden_dropout_do)
         model.summary()
 
-        early_stopper = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=EARLY_STOPPER_MIN_DELTA, \
+        early_stopper = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=EARLY_STOPPER_MIN_DELTA,
                                                       patience=EARLY_STOPPER_PATIENCE, verbose=1, mode='auto')
         metrics_callback = MetricsCallbackWithGenerator(classifications_type, NN_BATCH_SIZE, Xv, yv)
 
-        history = model.fit_generator(generator=nn_batch_generator(X, y, NN_BATCH_SIZE), \
-                                            samples_per_epoch=X.shape[0],\
-                                            validation_data=nn_batch_generator(Xv, yv, NN_BATCH_SIZE),\
-                                            nb_val_samples=Xv.shape[0],\
-                                            verbose=MODEL_VERBOSITY,\
+        history = model.fit_generator(generator=nn_batch_generator(X, y, NN_BATCH_SIZE),
+                                            samples_per_epoch=X.shape[0],
+                                            validation_data=nn_batch_generator(Xv, yv, NN_BATCH_SIZE),
+                                            nb_val_samples=Xv.shape[0],
+                                            verbose=MODEL_VERBOSITY,
                                             nb_epoch=NN_MAX_EPOCHS, callbacks=[early_stopper, metrics_callback])
 
         # using the recorded weights of the best recorded validation loss

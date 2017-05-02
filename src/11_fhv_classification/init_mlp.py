@@ -150,7 +150,7 @@ if DO_TEST == False:
     X, y = get_data(X_file, y_file, mmap=True)
     Xv, yv = get_data(Xv_file, yv_file, mmap=True)
 
-    NN_INPUT_NEURONS = X.shape[1]
+    NN_INPUT_NEURONS = X.shape[2]
 
 
     param_sampler = ParameterSampler({
@@ -211,7 +211,8 @@ if DO_TEST == False:
 
         early_stopper = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=EARLY_STOPPER_MIN_DELTA,
                                                       patience=EARLY_STOPPER_PATIENCE, verbose=1, mode='auto')
-        metrics_callback = MetricsCallback(classifications_type, PARTS_LEVEL, NN_BATCH_SIZE, is_mlp=True)
+        metrics_callback = MetricsCallback(os.path.join(matrices_save_location, GLOBAL_VARS.MODEL_NAME),
+                                           classifications_type, PARTS_LEVEL, NN_BATCH_SIZE, is_mlp=True)
 
         # Model Fitting
         history = model.fit_generator(
@@ -278,7 +279,7 @@ else:
                                      classifications_type, PARTS_LEVEL, 'test')
     Xt, yt = get_data(Xt_file, yt_file, mmap=True)
 
-    NN_INPUT_NEURONS = Xt.shape[1]
+    NN_INPUT_NEURONS = Xt.shape[2]
 
 
     first_hidden_layer_size = args.test1stSize
