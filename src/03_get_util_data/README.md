@@ -1,6 +1,6 @@
 ### Purpose
 
-Reads from the elasticsearch database and writes out the following information to pickle files to be use later:
+Reads from the elasticsearch database and writes out the following information to pickle files to be used later:
  
  - Names of sections, classes and subclasses
  - list of valid classes and subclasses that meet the minimum number of documents limit
