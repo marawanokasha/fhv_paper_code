@@ -21,12 +21,13 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 root_location = "../../data/"
 exports_location = root_location + "exported_data/"
-doc_classifications_map_file = exports_location + "doc_classification_map.pkl"
-training_docs_list_file = exports_location + "training_docs_list.pkl"
-validation_docs_list_file = exports_location + "validation_docs_list.pkl"
-test_docs_list_file = exports_location + "test_docs_list.pkl"
 
-doc_classification_map = pickle.load(open(doc_classifications_map_file))
+doc_classification_map_file = os.path.join(exports_location, "doc_classification_map.pkl")
+training_docs_list_file = os.path.join(exports_location, "training_docs_list.pkl")
+validation_docs_list_file = os.path.join(exports_location, "validation_docs_list.pkl")
+test_docs_list_file = os.path.join(exports_location, "test_docs_list.pkl")
+
+doc_classification_map = pickle.load(open(doc_classification_map_file))
 training_docs_list = pickle.load(open(training_docs_list_file))
 validation_docs_list = pickle.load(open(validation_docs_list_file))
 test_docs_list = pickle.load(open(test_docs_list_file))

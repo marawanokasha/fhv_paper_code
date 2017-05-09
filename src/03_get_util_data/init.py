@@ -133,6 +133,9 @@ for (classf, documents) in classifications_index.items():
     validation_documents.update(classif_validation_docs)
     test_documents.update(classif_test_docs)
 
+training_docs_list = list(training_documents)
+validation_docs_list = list(validation_documents)
+test_docs_list = list(test_documents)
 
 # Save to pickle files to be used in later steps
 pickle.dump(sections, open(sections_file, 'w'))
@@ -144,6 +147,6 @@ pickle.dump(classifications, open(classifications_file, 'w'))
 pickle.dump(classifications_index, open(classifications_index_file, 'w'))
 pickle.dump(doc_classification_map, open(doc_classification_map_file, 'w'))
 
-pickle.dump(training_documents, open(training_docs_list_file, 'w'))
-pickle.dump(validation_documents, open(validation_docs_list_file, 'w'))
-pickle.dump(test_documents, open(test_docs_list_file, 'w'))
+pickle.dump(training_docs_list, open(training_docs_list_file, 'w'))
+pickle.dump(validation_docs_list, open(validation_docs_list_file, 'w'))
+pickle.dump(test_docs_list, open(test_docs_list_file, 'w'))
